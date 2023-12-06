@@ -16,19 +16,19 @@ int main()
     string line;
 
     int result = 1;
-    vector<int> times = vector<int>();
-    vector<int> records = vector<int>();
+    vector<unsigned long long> times = vector<unsigned long long>();
+    vector<unsigned long long> records = vector<unsigned long long>();
 
     if (getline(inputFile, line)) {
         while (regex_search(line, match, pattern)) {
-            times.push_back(stoi(match.str()));
+            times.push_back(stoll(match.str()));
             line = match.suffix().str();
         }
     }
     if (getline(inputFile, line)) {
         while (regex_search(line, match, pattern))
         {
-            records.push_back(stoi(match.str()));
+            records.push_back(stoll(match.str()));
             line = match.suffix().str();
         }
     }
@@ -56,20 +56,20 @@ int main()
     // t2 = (-T - sqrt(T^2 + 4s)) / -2
 
     for (int i = 0; i < times.size(); i++) {
-        int discriminant = times[i] * times[i] - 4 * records[i];
+        unsigned long long discriminant = times[i] * times[i] - 4 * records[i];
         if (discriminant <= 0) {
             continue;
         }
-        float discriminantSquared = sqrt((float)discriminant);
-        float t1 = (-times[i] + discriminantSquared) / -2;
-        float t2 = (-times[i] - discriminantSquared) / -2;
-        float higher = max(t1, t2);
-        float lower = min(t1, t2);
+        long double discriminantSquared = sqrt((long double)discriminant);
+        long double t1 = ((long double)times[i] - discriminantSquared) / (long double)2;
+        long double t2 = ((long double)times[i] + discriminantSquared) / (long double)2;
+        long double higher = max(t1, t2);
+        long double lower = min(t1, t2);
         if (higher == floor(higher)) {
             higher--;
             lower++;
         }
-        result *= (int)floor(higher) - (int)ceil(lower) + 1;
+        result *= (unsigned long long)floor(higher) - (unsigned long long)ceil(lower) + 1;
     }
     
     inputFile.close();
