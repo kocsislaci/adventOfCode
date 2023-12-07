@@ -16,44 +16,42 @@ enum Color {
 
 int main() {
   ifstream inputFile;
-  inputFile.open("../input2.txt");
+  inputFile.open("./input2.txt");
 
   smatch match;
   string line;
 
   int result = 0;
-  bool possible = true;
-  vector<int> containing = vector<int>(); // r g b
-  containing.push_back(12);
-  containing.push_back(13);
-  containing.push_back(14);
-  vector<int> numbers = vector<int>();
-  vector<Color> words = vector<Color>();
+  vector<int> colorMax = vector<int>(); // r g b
+  colorMax.push_back(0);
+  colorMax.push_back(0);
+  colorMax.push_back(0);
 
   while (getline(inputFile, line)) {
-
-    int gameNumber;
+    colorMax[0] = 0;
+    colorMax[1] = 0;
+    colorMax[2] = 0;
     if (regex_search(line, match, numberPattern)) {
-      gameNumber = stoi(match.str());
+      // we get the first number to get the needed numbers later
     }
-    while (regex_search(line, match, numberPattern) && possible) {
+    while (regex_search(line, match, numberPattern)) {
       int number = stoi(match.str());
       line = match.suffix().str();
       if (regex_search(line, match, wordPattern)) {
         switch (match.str()[0]) {
         case 'r':
-          if (number > containing[0]) {
-            possible = false;
+          if (number > colorMax[0]) {
+            colorMax[0] = number;
           }
           break;
         case 'g':
-          if (number > containing[1]) {
-            possible = false;
+          if (number > colorMax[1]) {
+            colorMax[1] = number;
           }
           break;
         case 'b':
-          if (number > containing[2]) {
-            possible = false;
+          if (number > colorMax[2]) {
+            colorMax[2] = number;
           }
           break;
         default:
@@ -61,11 +59,7 @@ int main() {
         }
       }
     }
-    if (possible) {
-      result += gameNumber;
-    } else {
-      possible = true;
-    }
+    result += colorMax[0] * colorMax[1] * colorMax[2];
   }
 
   inputFile.close();
