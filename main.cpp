@@ -12,22 +12,27 @@ const regex wordPattern("\\b\\w+\\b");
 
 int main() {
   ifstream inputFile;
-  inputFile.open("./input3.txt");
+  inputFile.open("../input3.txt");
 
   smatch match;
   string line;
   vector<string> lines = vector<string>(3); // keep size 3
 
   int result = 0;
-  bool forTheLastLine = true;
+  bool justOneMoreTime = true;
 
-  while (getline(inputFile, line) || forTheLastLine) {
+  vector<array<int, 4> > gearAcc = vector<array<int, 4> >();
+
+  // if we find a new one then check if we have and if they the same then * and
+  // delete from list
+  int Y = 0;
+  while (getline(inputFile, line) || justOneMoreTime) {
     lines[2] = lines[1]; // new line then drop the last one
     lines[1] = lines[0];
     lines[0] = line;
 
-    if (lines[0].empty()) {
-      forTheLastLine = false;
+    if (lines[0].empty()) { // we arrived to the last line
+      justOneMoreTime = false;
     }
 
     int X = 0;
@@ -38,51 +43,71 @@ int main() {
 
       if (isdigit(lines[1][X])) {
 
+        std::array<int, 4> gear;
+
         acc += lines[1][X];
 
         if ((X + 1) == lines[1].size()) { // last in the row
           isLast = true;
         }
+
         if (!isdigit(lines[1][X + 1]) &&
-            (X + 1) < lines[1].size()) { // right neighbour
+            (X + 1) < lines[1].size()) { // right neighbour is not number
           isLast = true;
         }
 
-        for (int dx = -1; dx < 2; dx++) {
-          for (int dy = -1; dy < 2; dy++) {
-
-            if (canCalc) { // already found special char for this accumulated
-                           // integer
-              continue;
-            }
-
-            if (lines[dy + 1].empty()) { // empty line
-              continue;
-            }
-
-            if (dy == 0 && dx == 0 || (-1 == X + dx) ||
-                (lines[1].size() == X + dx)) { // middle and out of bounds
-              continue;
-            }
-
-            if (!isdigit(lines[dy + 1][X + dx]) &&
-                lines[dy + 1][X + dx] != '.') { // finish
-              canCalc = true;
-              dx = 2;
-              dy = 2;
-            }
-          }
-        }
         if (isLast) {
-          if (acc.size() > 0 && canCalc) {
-            result += stoi(acc);
+          for (int dy = -1; dy < 2; dy++) {
+            for (int dx = -acc.size(); dx < 2; dx++) {
+
+              if (lines[dy + 1].empty()) { // empty line
+                continue;
+              }
+
+              if ((dy == 0 && dx != -acc.size() && dx != 1) || (-1 == X + dx) ||
+                  (lines[1].size() == X + dx)) { // middle and out of bounds
+                continue;
+              }
+
+              if (lines[dy + 1][X + dx] == '*') { // found one gear!
+                cout << X + dx << " " << Y - dy << " " << acc << endl;
+                gear[0] = X + dx;
+                gear[1] = Y - dy;
+                gear[2] = stoi(acc);
+                gear[3] = 1;
+                bool exists = false;
+                for (int i = 0; i < gearAcc.size(); i++) {
+                  if (gear[0] == gearAcc[i][0] && gear[1] == gearAcc[i][1]) {
+                    if (gearAcc[i][3] == 2) {
+                      gearAcc[i][2] = 0; // mutable lists can kill our for
+                    } else {
+                      gearAcc[i][2] =
+                          gear[2] * gearAcc[i][2]; // accumulate the value
+                      gearAcc[i][3] += 1;
+                    }
+                    exists = true;
+                  }
+                }
+                if (!exists) {
+                  gearAcc.push_back(gear);
+                }
+                dx = 2; // can finish search
+                dy = 2;
+              }
+            }
           }
-          canCalc = false;
           isLast = false;
           acc = "";
         }
       }
       X++;
+    }
+    Y++;
+  }
+
+  for (int i = 0; i < gearAcc.size(); i++) {
+    if (gearAcc[i][3] == 2) {
+      result += gearAcc[i][2];
     }
   }
 
@@ -92,5 +117,5 @@ int main() {
 }
 
 // test data:
-// 467+35+633+617+592+755+664+598
-// result shoudl be: 4361
+// 467 * 35 + 755 * 598
+// result shoudl be: 467835
